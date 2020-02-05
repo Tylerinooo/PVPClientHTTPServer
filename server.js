@@ -1,44 +1,51 @@
-const config = require('./config/config');
-const express = require('express');
-const session = require('express-session');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const morgan = require('morgan');
-const app = express();
-const port = process.env.PORT || config.port;
+const config = require(`./config/config`);
+const express = require(`express`);
+const session = require(`express-session`);
+let cookieParser = require(`cookie-parser`);
+let bodyParser = require(`body-parser`);
+let morgan = require(`morgan`);
+let app = express();
+let port = process.env.PORT || config.port;
 
-const passport = require('passport');
-const flash = require('connect-flash');
+let passport = require(`passport`);
+let flash = require(`connect-flash`);
+let username = require(`username`);
+let chalk = require(`chalk`);
 
-//connect to our database
+require(`./helpers/passport`)(passport);
 
-require('./helpers/passport')(passport); //pass passport for configuration
-
-//set up our express application
-app.use(morgan('dev')); //log every request to the console
-app.use(cookieParser()); //read cookies (needed for auth)
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
+app.use(morgan(`dev`));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.set('view engine', 'ejs'); //set up ejs for templating
+app.set(`view engine`, `ejs`);
 
-//required for passport
 app.use(session({
-    secret: 'this_is_a_super_secret_session_sescret_._you_should_change_this',
+    secret: `this_is_a_super_secret_session_sescret_._you_should_change_this`,
     resave: true,
     saveUninitialized: true,
-})); //session secret
+}));
 
 app.use(passport.initialize());
-app.use(passport.session()); //persistent login sessions
-app.use(flash()); //use connect-flash for flash messages stored in session
+app.use(passport.session());
+app.use(flash());
 
-app.use('/static', express.static('views/static'));
+app.use(`/static`, express.static(`views/static`));
 
-require('./app/routes.js')(app, passport); //load our routes and pass in our app and fully configured passport
+require(`./app/routes.js`)(app, passport);
 
 app.listen(port);
-console.log("Running Eric's Client Communication Server v" + config.version);
-console.log(`The magic happens on port ${port}`);
+
+(async () => {
+    console.log(`Welcome user: ` + chalk.cyan(await username()) + `!`);
+	console.log(`This was made by ` + chalk.cyan(`Eric Golde`) + ` and modified by ` + chalk.cyan(`Tyler.#0911`) + `!`);
+	console.log(`Running ` + chalk.cyan(`Eric's Client Communication System`) + ` v${config.version}`);
+    console.log(`The server is on port: ` + chalk.cyan(port));
+    console.log(``);
+    console.log(`I have removed a lot of // comments so go to the following link if you would like to see what he said:`)
+    console.log(chalk.cyan(`https://github.com/egold555/PVPClientHTTPServer`));
+    console.log(``);
+    console.log(`Eric: ${chalk.cyan(`https://github.com/egold555/`)}`);
+    console.log(`Tyler: ${chalk.cyan(`https://github.com/Tylerinooo/`)}`);
+})();

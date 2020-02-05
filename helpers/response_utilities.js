@@ -1,5 +1,4 @@
 module.exports = {
-    
     success(res, data = null) {
         this.sendResponse(res, 200, data);
     },

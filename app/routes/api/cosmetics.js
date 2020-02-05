@@ -1,6 +1,6 @@
 /*
 
-Prints out JSOn of every users cosmetics from the database
+Prints out Json of every users cosmetics from the database
 Example:
 [
   {
@@ -32,49 +32,37 @@ Use JS objects as json blocks, see hat for example
 
 */
 
-var responseUtils = require('../../.././helpers/response_utilities.js');
+let responseUtils = require(`../../.././helpers/response_utilities.js`);
+let dbconfig = require(`../../.././config/database`);
 
 module.exports = (app, passport, database) => {
 
-    app.get('/api/cosmetics', (req, res) => {
+    app.get(`/api/cosmetics`, (req, res) => {
 
-        //Query the database for everyones cosmetics
-        database.query("SELECT * FROM `cosmetics` ", function (err, rows, fields) {
+      database.query(`SELECT * FROM ${dbconfig.cosmetics_tbl}`, function (err, rows, fields) {
+          if (err) throw err;
 
-            if (err) {
-                throw err;
-            }
+          var objs = [];
 
-            var objs = [];
-            
-            //loop through all rows, and grab the data
-            for (var i = 0; i < rows.length; i++) {
-                
-                var row = rows[i];
-                
-                //Creates a hat object for cosmetics with mutiple settings.
-                //Not really needed, but I find it more easy to read and understand what the json is
-                var hat = new Object();
-                
-                hat.enabled = row.hat_enabled;
-                hat.r = row.hat_color_r;
-                hat.g = row.hat_color_g;
-                hat.b = row.hat_color_b;
-                
-                //push a new object containing the fields to the array
-                objs.push({
-                    uuid: row.uuid,
-                    cape_style: row.cape_style,
-                    hat: hat,
-                    googly_eyes: row.googly_eyes
-                });
-            }
-            
-            //respond with 200 success and the json string
-            responseUtils.success(res, JSON.stringify(objs));
+          for (var i = 0; i < rows.length; i++) {
+              
+              var row = rows[i];
+              var hat = new Object();
+              
+              hat.enabled = row.hat_enabled;
+              hat.r = row.hat_color_r;
+              hat.g = row.hat_color_g;
+              hat.b = row.hat_color_b;
 
-        });
+              objs.push({
+                  uuid: row.uuid,
+                  cape_style: row.cape_style,
+                  hat: hat,
+                  googly_eyes: row.googly_eyes
+              });
+          }
 
-    });
-
+          responseUtils.success(res, JSON.stringify(objs));
+      });
+  });
 }
